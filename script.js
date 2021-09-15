@@ -35,6 +35,15 @@ searchButton.addEventListener("click", async function() {
   updateUIMovies(movies);
 });
 
+// event binding
+document.addEventListener("click", async function(e) {
+  if (e.target.classList.contains("modal-detail-button")) {
+    const imdbid = e.target.dataset.imdbid;
+    const movieDetail = await getMoviesDetail(imdbid);
+    updateUIDetail(movieDetail);
+  }
+});
+
 function getMovies(keyword) {
   return fetch("http://www.omdbapi.com/?apikey=91845964&s=" + keyword)
     .then(response => response.json())
@@ -46,6 +55,18 @@ function updateUIMovies(movies) {
   movies.forEach(m => (cards += showCards(m)));
   const movieContainer = document.querySelector(".movie-container");
   movieContainer.innerHTML = cards;
+}
+
+function getMoviesDetail(imdbid) {
+  return fetch("http://www.omdbapi.com/?apikey=91845964&i=" + imdbid)
+    .then(response => response.json())
+    .then(m => m);
+}
+
+function updateUIDetail(m) {
+  const movieDetail = showMovieDetail(m);
+  const modalBody = document.querySelector(".modal-body");
+  modalBody.innerHTML = movieDetail;
 }
 
 function showCards(m) {
