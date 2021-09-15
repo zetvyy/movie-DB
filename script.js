@@ -1,23 +1,28 @@
 const searchButton = document.querySelector(".search-button");
 searchButton.addEventListener("click", async function() {
-  const inputKeyword = document.querySelector(".input-keyword");
-  const movies = await getMovies(inputKeyword.value);
-  updateUIMovies(movies);
-});
-
-// event binding
-document.addEventListener("click", async function(e) {
-  if (e.target.classList.contains("modal-detail-button")) {
-    const imdbid = e.target.dataset.imdbid;
-    const movieDetail = await getMoviesDetail(imdbid);
-    updateUIDetail(movieDetail);
+  try {
+    const inputKeyword = document.querySelector(".input-keyword");
+    const movies = await getMovies(inputKeyword.value);
+    updateUIMovies(movies);
+  } catch (err) {
+    alert(err);
   }
 });
 
 function getMovies(keyword) {
   return fetch("http://www.omdbapi.com/?apikey=91845964&s=" + keyword)
-    .then(response => response.json())
-    .then(response => response.Search);
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
+      return response.json();
+    })
+    .then(response => {
+      if (response.Response === "False") {
+        throw new Error(response.Error);
+      }
+      return response.Search;
+    });
 }
 
 function updateUIMovies(movies) {
@@ -27,9 +32,27 @@ function updateUIMovies(movies) {
   movieContainer.innerHTML = cards;
 }
 
+// event binding
+document.addEventListener("click", async function(e) {
+  try {
+    if (e.target.classList.contains("modal-detail-button")) {
+      const imdbid = e.target.dataset.imdbid;
+      const movieDetail = await getMoviesDetail(imdbid);
+      updateUIDetail(movieDetail);
+    }
+  } catch (err) {
+    alert(err);
+  }
+});
+
 function getMoviesDetail(imdbid) {
   return fetch("http://www.omdbapi.com/?apikey=91845964&i=" + imdbid)
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
+      return response.json();
+    })
     .then(m => m);
 }
 
